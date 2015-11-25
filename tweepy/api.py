@@ -175,11 +175,12 @@ class API(object):
             allowed_param=['id']
         )
 
-    def update_status(self, media_ids=None, *args, **kwargs):
+    def update_status(self, *args, **kwargs):
         """ :reference: https://dev.twitter.com/rest/reference/post/statuses/update
             :allowed_param:'status', 'in_reply_to_status_id', 'lat', 'long', 'source', 'place_id', 'display_coordinates', 'media_ids'
         """
         post_data = {}
+        media_ids = kwargs.pop("media_ids", None)
         if media_ids is not None:
             post_data["media_ids"] = list_to_csv(media_ids)
 
@@ -391,39 +392,39 @@ class API(object):
     @property
     def direct_messages(self):
         """ :reference: https://dev.twitter.com/rest/reference/get/direct_messages
-            :allowed_param:'since_id', 'max_id', 'count'
+            :allowed_param:'since_id', 'max_id', 'count', 'full_text'
         """
         return bind_api(
             api=self,
             path='/direct_messages.json',
             payload_type='direct_message', payload_list=True,
-            allowed_param=['since_id', 'max_id', 'count'],
+            allowed_param=['since_id', 'max_id', 'count', 'full_text'],
             require_auth=True
         )
 
     @property
     def get_direct_message(self):
         """ :reference: https://dev.twitter.com/rest/reference/get/direct_messages/show
-            :allowed_param:'id'
+            :allowed_param:'id', 'full_text'
         """
         return bind_api(
             api=self,
             path='/direct_messages/show/{id}.json',
             payload_type='direct_message',
-            allowed_param=['id'],
+            allowed_param=['id', 'full_text'],
             require_auth=True
         )
 
     @property
     def sent_direct_messages(self):
         """ :reference: https://dev.twitter.com/rest/reference/get/direct_messages/sent
-            :allowed_param:'since_id', 'max_id', 'count', 'page'
+            :allowed_param:'since_id', 'max_id', 'count', 'page', 'full_text'
         """
         return bind_api(
             api=self,
             path='/direct_messages/sent.json',
             payload_type='direct_message', payload_list=True,
-            allowed_param=['since_id', 'max_id', 'count', 'page'],
+            allowed_param=['since_id', 'max_id', 'count', 'page', 'full_text'],
             require_auth=True
         )
 
@@ -528,13 +529,13 @@ class API(object):
     @property
     def friends(self):
         """ :reference: https://dev.twitter.com/rest/reference/get/friends/list
-            :allowed_param:'id', 'user_id', 'screen_name', 'cursor'
+            :allowed_param:'id', 'user_id', 'screen_name', 'cursor', 'skip_status', 'include_user_entities'
         """
         return bind_api(
             api=self,
             path='/friends/list.json',
             payload_type='user', payload_list=True,
-            allowed_param=['id', 'user_id', 'screen_name', 'cursor']
+            allowed_param=['id', 'user_id', 'screen_name', 'cursor', 'skip_status', 'include_user_entities']
         )
 
     @property
@@ -618,7 +619,7 @@ class API(object):
 
     def verify_credentials(self, **kargs):
         """ :reference: https://dev.twitter.com/rest/reference/get/account/verify_credentials
-            :allowed_param:'include_entities', 'skip_status'
+            :allowed_param:'include_entities', 'skip_status', 'include_email'
         """
         try:
             return bind_api(
@@ -626,7 +627,7 @@ class API(object):
                 path='/account/verify_credentials.json',
                 payload_type='user',
                 require_auth=True,
-                allowed_param=['include_entities', 'skip_status'],
+                allowed_param=['include_entities', 'skip_status', 'include_email'],
             )(**kargs)
         except TweepError as e:
             if e.response and e.response.status == 401:
